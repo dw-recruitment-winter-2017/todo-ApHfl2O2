@@ -34,6 +34,14 @@
               (pr-str new-todo)
               #js {"Content-Type" "application/edn"})))
 
+(defn delete-todo
+  [id]
+  (xhr/send "/todo-api/delete"
+            new-state-cb
+            "POST"
+            (pr-str id)
+            #js {"Content-Type" "application/edn"}))
+
 (defn todo-item
   [id text completed?]
   [:tr
@@ -42,7 +50,10 @@
                  :on-change #(check-todo id (not completed?))}]]
    [:td (when completed? {:class "completed"}) text]
    [:td [:a {:href "#"
-             :class "delete"}
+             :class "delete"
+             :on-click (fn [e]
+                         (.preventDefault e)
+                         (delete-todo id))}
          "x"]]])
 
 (defn todo-list

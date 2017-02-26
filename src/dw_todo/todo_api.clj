@@ -31,6 +31,16 @@
                    (todo-db/amend todo-db (:body %))
                    (pr-str (todo-db/fetch-all todo-db)))}}}))
 
+(defn delete-resource [todo-api]
+  (yada/resource
+   {:methods
+    {:post
+     {:consumes "application/edn"
+      :produces "application/edn"
+      :response #(let [todo-db (:todo-db todo-api)]
+                   (todo-db/delete todo-db (:body %))
+                   (pr-str (todo-db/fetch-all todo-db)))}}}))
+
 (defn fetch-all-resource [todo-api]
   (yada/resource
    {:methods
@@ -42,4 +52,5 @@
   [todo-api]
   {"add" (add-resource todo-api)
    "amend" (amend-resource todo-api)
+   "delete" (delete-resource todo-api)
    "fetch-all" (fetch-all-resource todo-api)})
