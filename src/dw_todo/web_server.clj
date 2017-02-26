@@ -1,11 +1,13 @@
 (ns dw-todo.web-server
   (:require [com.stuartsierra.component :as component]
+            [dw-todo.todo-api :as todo-api]
             [yada.yada :as yada]
             [yada.resources.classpath-resource :refer [new-classpath-resource]]))
 
 (defn routes
   [web-server]
-  ["" (yada/yada (new-classpath-resource "public" {:index-files ["index.html"]}))])
+  ["" [["/todo-api/" (todo-api/routes (:todo-api web-server))]
+       ["" (yada/yada (new-classpath-resource "public" {:index-files ["index.html"]}))]]])
 
 (defrecord WebServer [port listener]
   component/Lifecycle
@@ -23,4 +25,4 @@
   []
   (component/using
    (map->WebServer {:port 3000})
-   []))
+   [:todo-api]))

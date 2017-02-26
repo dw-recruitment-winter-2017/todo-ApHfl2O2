@@ -1,5 +1,6 @@
 (ns dw-todo.system
   (:require [com.stuartsierra.component :as component]
+            [dw-todo.todo-api :as todo-api]
             [dw-todo.todo-db :as todo-db]
             [dw-todo.web-server :as web]))
 
@@ -8,4 +9,5 @@
   []
   (component/system-map
    :web-server (web/new-web-server)
-   :todo-db (todo-db/new-todo-db)))
+   :todo-db (todo-db/new-todo-db)
+   :todo-api (todo-api/new-todo-api)))
