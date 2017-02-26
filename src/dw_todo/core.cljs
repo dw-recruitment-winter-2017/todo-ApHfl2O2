@@ -95,7 +95,29 @@
 
 (defmethod contents :about
   []
-  [:div "About"])
+  [:div
+   [:p
+    "This project, completed for Democracy Works, demonstrates a simple todo app "
+    "in Clojure and ClojureScript. It implements these features:"]
+   [:ul
+    [:li "Add a new TODO (initially incomplete)"]
+    [:li "Mark a TODO as completed"]
+    [:li "Unmark a TODO as completed (i.e. return it to incomplete state)"]
+    [:li "Delete existing TODOs"]]
+   [:p
+    [:a {:href "https://github.com/juxt/yada"} "Yada"] " is used"
+    " is used on the backend to serve static assets and respond "
+    "to API requests while on the frontend, rendering is done with "
+    [:a {:href "https://github.com/reagent-project/reagent"} "Reagent"]
+    " and navigation/routing is handled by "
+    [:a {:href "https://github.com/venantius/accountant"} "Accountant"]
+    " and "
+    [:a {:href "https://github.com/juxt/bidi"} "Bidi"]
+    ". For portability, data is persisted in-memory in an atom. If desired, the atom-based "
+    "storage can be easily replaced by extending the TodoStore protocol, and "
+    "modifying the system (that is, a "
+    [:a {:href "https://github.com/stuartsierra/component"} "Component"]
+    " system) to use the new storage."]])
 
 (defn page
   []
