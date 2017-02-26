@@ -1,0 +1,9 @@
+.completed {
+  text-decoration: line-through;
+  color: #808080;
+}
+
+.delete {
+  text-decoration: none;
+  color: red;
+}
