@@ -15,6 +15,7 @@
 (declare todo-state)
 
 (defn new-state-cb
+  "A callback for resetting the state after server interactions"
   [e]
   (reset! todo-state (read-string (-> e .-target .getResponseText))))
 
@@ -25,6 +26,7 @@
     state*))
 
 (defn check-todo
+  "Sends check and uncheck events to the backend"
   [id completed?]
   (let [todo (first (filter #(= id (:id %)) @todo-state))
         new-todo (assoc todo :completed? completed?)]
@@ -35,6 +37,7 @@
               #js {"Content-Type" "application/edn"})))
 
 (defn delete-todo
+  "Sends delete requests to the backend"
   [id]
   (xhr/send "/todo-api/delete"
             new-state-cb
@@ -42,7 +45,20 @@
             (pr-str id)
             #js {"Content-Type" "application/edn"}))
 
+(defn new-todo
+  "Sends requests to add todos to the backend"
+  [e text]
+  (when (= (.-which e) 13) ;; Enter key
+    (xhr/send "/todo-api/add"
+              #(do
+                 (new-state-cb %)
+                 (reset! text ""))
+              "POST"
+              (pr-str {:text @text :completed? false})
+              #js {"Content-Type" "application/edn"})))
+
 (defn todo-item
+  "A Reagent component for rendering a single todo"
   [id text completed?]
   [:tr
    [:td [:input {:type "checkbox"
@@ -57,24 +73,15 @@
          "x"]]])
 
 (defn todo-list
+  "A Reagent component for rendering all the todos"
   []
   [:table
    [:tbody
     (for [{:keys [id text completed?]} @todo-state]
       ^{:key id} [todo-item id text completed?])]])
 
-(defn new-todo
-  [e text]
-  (when (= (.-which e) 13) ;; Enter key
-    (xhr/send "/todo-api/add"
-              #(do
-                 (new-state-cb %)
-                 (reset! text ""))
-              "POST"
-              (pr-str {:text @text :completed? false})
-              #js {"Content-Type" "application/edn"})))
-
 (defn todo-input
+  "A Reagent component for the todo input box"
   []
   (let [text (r/atom "")]
     (fn []
@@ -83,6 +90,8 @@
                :value @text
                :on-change #(reset! text (-> % .-target .-value))
                :on-key-down #(new-todo % text)}])))
+
+;; Routing
 
 (defmulti contents identity)
 
@@ -120,6 +129,8 @@
     " system) to use the new storage."]])
 
 (defn page
+  "A template for pages; looks up the current route and calls
+  the `contents` multimethod to retrieve the appropriate content"
   []
   [:div
    [:a {:href (bidi/path-for routes :index)} "Todos"]
@@ -128,6 +139,7 @@
    (contents @location)])
 
 (defn render!
+  "Mount the main component"
   []
   (r/render [page] (.getElementById js/document "app")))
 
