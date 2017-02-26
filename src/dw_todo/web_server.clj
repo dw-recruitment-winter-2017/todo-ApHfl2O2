@@ -7,6 +7,7 @@
 (defn routes
   [web-server]
   ["" [["/todo-api/" (todo-api/routes (:todo-api web-server))]
+       ["/about" (yada/handler (clojure.java.io/resource "public/index.html"))]
        ["" (yada/yada (new-classpath-resource "public" {:index-files ["index.html"]}))]]])
 
 (defrecord WebServer [port listener]
