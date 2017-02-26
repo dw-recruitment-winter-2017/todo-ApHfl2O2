@@ -17,3 +17,7 @@
 (defn undev []
   (stop)
   (stop-figwheel!))
+
+(defn -main []
+  (dev)
+  @(promise))
