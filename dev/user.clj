@@ -9,3 +9,11 @@
             [figwheel-sidecar.repl-api :as ra :refer [start-figwheel! stop-figwheel! cljs-repl]]))
 
 (set-init! #(system/new-system))
+
+(defn dev []
+  (go)
+  (start-figwheel!))
+
+(defn undev []
+  (stop)
+  (stop-figwheel!))
