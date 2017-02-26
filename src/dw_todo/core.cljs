@@ -24,11 +24,22 @@
               new-state-cb)
     state*))
 
+(defn check-todo
+  [id completed?]
+  (let [todo (first (filter #(= id (:id %)) @todo-state))
+        new-todo (assoc todo :completed? completed?)]
+    (xhr/send "/todo-api/amend"
+              new-state-cb
+              "POST"
+              (pr-str new-todo)
+              #js {"Content-Type" "application/edn"})))
+
 (defn todo-item
   [id text completed?]
   [:tr
    [:td [:input {:type "checkbox"
-                 :checked completed?}]]
+                 :checked completed?
+                 :on-change #(check-todo id (not completed?))}]]
    [:td (when completed? {:class "completed"}) text]
    [:td [:a {:href "#"
              :class "delete"}
