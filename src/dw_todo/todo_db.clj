@@ -1,5 +1,13 @@
 (ns dw-todo.todo-db
-  (:require [com.stuartsierra.component :as component]))
+  (:require [clojure.spec :as s]
+            [com.stuartsierra.component :as component]))
+
+(s/def ::id uuid?)
+(s/def ::completed? boolean?)
+(s/def ::text string?)
+(s/def ::todo (s/keys :req-un [::id ::completed? ::text]))
+(s/def ::todo-add (s/keys :req-un [::completed? ::text]))
+(s/def ::todo-amend (s/keys :opt-un [::completed? ::text]))
 
 (defprotocol TodoStore
   (add* [self data])
@@ -10,22 +18,31 @@
 
 (defn add
   [todo-store data]
+  {:pre [(s/valid? ::todo-add data)]
+   :post [(s/valid? ::todo %)]}
   (add* todo-store data))
 
 (defn fetch
   [todo-store todo-id]
+  {:pre [(s/valid? ::id todo-id)]
+   :post [(s/valid? (s/nilable ::todo) %)]}
   (fetch* todo-store todo-id))
 
 (defn amend
   [todo-store data]
+  {:pre [(s/valid? ::todo-amend data)]
+   :post [(s/valid? ::todo %)]}
   (amend* todo-store data))
 
 (defn delete
   [todo-store todo-id]
+  {:pre [(s/valid? ::id todo-id)]
+   :post [(s/valid? boolean? %)]}
   (delete* todo-store todo-id))
 
 (defn fetch-all
   [todo-store]
+  {:post [(s/valid? (s/coll-of ::todo) %)]}
   (fetch-all* todo-store))
 
 (defrecord TodoDb [store]
