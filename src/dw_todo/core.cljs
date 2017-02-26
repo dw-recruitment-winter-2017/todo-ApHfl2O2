@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [bidi.bidi :as bidi]
             [accountant.core :as acc]
-            [goog.net.XhrIo :as xhr]))
+            [goog.net.XhrIo :as xhr]
+            [cljs.reader :refer [read-string]]))
 
 (def routes
   ["/"
@@ -11,11 +12,42 @@
 
 (defonce location (r/atom nil))
 
+(declare todo-state)
+
+(defn new-state-cb
+  [e]
+  (reset! todo-state (read-string (-> e .-target .getResponseText))))
+
+(defonce todo-state
+  (let [state* (r/atom '())]
+    (xhr/send "/todo-api/fetch-all"
+              new-state-cb)
+    state*))
+
+(defn todo-item
+  [id text completed?]
+  [:tr
+   [:td [:input {:type "checkbox"
+                 :checked completed?}]]
+   [:td (when completed? {:class "completed"}) text]
+   [:td [:a {:href "#"
+             :class "delete"}
+         "x"]]])
+
+(defn todo-list
+  []
+  [:table
+   [:tbody
+    (for [{:keys [id text completed?]} @todo-state]
+      ^{:key id} [todo-item id text completed?])]])
+
 (defn new-todo
   [e text]
   (when (= (.-which e) 13) ;; Enter key
     (xhr/send "/todo-api/add"
-              #(reset! text "")
+              #(do
+                 (new-state-cb %)
+                 (reset! text ""))
               "POST"
               (pr-str {:text @text :completed? false})
               #js {"Content-Type" "application/edn"})))
@@ -36,7 +68,8 @@
   []
   [:div
    [:h2 "Todos"]
-   [todo-input]])
+   [todo-input]
+   [todo-list]])
 
 (defmethod contents :about
   []

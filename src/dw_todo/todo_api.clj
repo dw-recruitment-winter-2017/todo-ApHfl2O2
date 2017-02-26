@@ -17,11 +17,18 @@
     {:post
      {:consumes "application/edn"
       :produces "application/edn"
-      ;;:parameters {:body todo-db/}
       :response #(let [todo-db (:todo-db todo-api)]
                    (todo-db/add todo-db (:body %))
                    (pr-str (todo-db/fetch-all todo-db)))}}}))
 
+(defn fetch-all-resource [todo-api]
+  (yada/resource
+   {:methods
+    {:get
+     {:produces "application/edn"
+      :response #(pr-str (todo-db/fetch-all (:todo-db todo-api)))}}}))
+
 (defn routes
   [todo-api]
-  {"add" (add-resource todo-api)})
+  {"add" (add-resource todo-api)
+   "fetch-all" (fetch-all-resource todo-api)})
